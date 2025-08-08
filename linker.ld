@@ -24,4 +24,9 @@ SECTIONS {
   	*(.bss*)
 	*(COMMON)
 	} > RAM
+  .heap (COPY) : ALIGN(8) {
+    _heap_start = .;
+    . = . + 0x1000;
+    _heap_end = .;
+    } >RAM
 }

@@ -1,3 +1,5 @@
+#include "FreeRTOS.h"
+#include "task.h"
 #define USART1_BASE 0x40013800
 #define USART1_SR   (*(volatile unsigned int*)(USART1_BASE + 0x00))
 #define USART1_DR   (*(volatile unsigned int*)(USART1_BASE + 0x04))
@@ -38,16 +40,18 @@ extern "C" void uart_send(char c) {
     USART1_DR = c;
 }
 
-extern "C" void uart_send_string(const char* str) {
+extern "C" void uart_task(void *pvParameters) {
+    const char* str = "Hello from STM32VL in QEMU!\n";
     while (*str) {
         uart_send(*str++);
     }
+    semihosting_exit(1);
+    while(1);
 }
 
-extern "C" void main() {
+int main() {
     uart_init();
-    uart_send_string("Hello from STM32VL in QEMU!\n");
-
+    xTaskCreate(uart_task, "HelloWorld", 128, nullptr, 1, nullptr);
+    vTaskStartScheduler();
     // Exit QEMU
-    semihosting_exit(0);
 }
